@@ -34,7 +34,12 @@ namespace FootballTraining.GapSystem
 
         private void Awake()
         {
-            if (_inputHandler == null) _inputHandler = FindObjectOfType<QuestInputHandler>();
+            // Do NOT use FindObjectOfType here — Awake() execution order is not guaranteed,
+            // so QuestInputHandler may not have Awake'd yet, returning null silently.
+            // Assign _inputHandler via the Inspector instead.
+            if (_inputHandler == null)
+                Debug.LogError("[GapAssignmentManager] QuestInputHandler not assigned in Inspector. " +
+                               "Pointer and gap selection will not function.");
             foreach (var z in _gapZones) z.OnSelected.AddListener(HandleZoneSelected);
             SetPointerVisible(false);
         }

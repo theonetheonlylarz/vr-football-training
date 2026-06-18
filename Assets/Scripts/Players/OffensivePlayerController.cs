@@ -22,6 +22,7 @@ namespace FootballTraining.Players
         private PlayerMovementConfig _movementConfig;
         private Coroutine _moveCoroutine;
         private float _speedMultiplier = 1f;
+        private bool _paused;
 
         // Animator parameter names
         private static readonly int HashPreSnap  = Animator.StringToHash("PreSnap");
@@ -77,16 +78,21 @@ namespace FootballTraining.Players
 
                 while (elapsed < duration)
                 {
-                    elapsed += Time.deltaTime;
-                    float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
-                    transform.position = Vector3.Lerp(fromPos, target, t);
-
-                    if ((target - transform.position).sqrMagnitude > 0.01f)
+                    // Do not advance time while paused — keeps Time.timeScale = 1 for VR
+                    // tracking so the headset never decouples from rendering.
+                    if (!_paused)
                     {
-                        Vector3 dir = (target - transform.position).normalized;
-                        dir.y = 0;
-                        if (dir.sqrMagnitude > 0.001f)
-                            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), Time.deltaTime * 8f);
+                        elapsed += Time.deltaTime;
+                        float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
+                        transform.position = Vector3.Lerp(fromPos, target, t);
+
+                        if ((target - transform.position).sqrMagnitude > 0.01f)
+                        {
+                            Vector3 dir2 = (target - transform.position).normalized;
+                            dir2.y = 0;
+                            if (dir2.sqrMagnitude > 0.001f)
+                                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir2), Time.deltaTime * 8f);
+                        }
                     }
                     yield return null;
                 }
@@ -126,7 +132,17 @@ namespace FootballTraining.Players
         public void SetPlaySpeed(float multiplier)
         {
             _speedMultiplier = multiplier;
-            if (_animator != null) _animator.speed = multiplier;
+            if (_animator != null) _animator.speed = _paused ? 0f : multiplier;
+        }
+
+        /// <summary>
+        /// Freeze/unfreeze this player without touching Time.timeScale.
+        /// VR-safe: the coroutine keeps yielding so the engine keeps rendering.
+        /// </summary>
+        public void SetPaused(bool paused)
+        {
+            _paused = paused;
+            if (_animator != null) _animator.speed = paused ? 0f : _speedMultiplier;
         }
     }
 }

@@ -11,6 +11,10 @@ namespace FootballTraining.Formations
     /// </summary>
     public static class FormationLibrary
     {
+        // Static cache keeps the ScriptableObject instances alive for the process lifetime.
+        // Without this, CreateInstance<> objects have no persistent owner and can be
+        // collected between scenes when Unity's GC runs.
+        private static Dictionary<FormationType, FormationConfig> _cache;
         public static FormationConfig CreateIFormation()
         {
             var cfg = ScriptableObject.CreateInstance<FormationConfig>();
@@ -151,7 +155,8 @@ namespace FootballTraining.Formations
 
         public static Dictionary<FormationType, FormationConfig> BuildAll()
         {
-            return new Dictionary<FormationType, FormationConfig>
+            if (_cache != null) return _cache;
+            _cache = new Dictionary<FormationType, FormationConfig>
             {
                 { FormationType.IFormation,  CreateIFormation() },
                 { FormationType.ProSet,      CreateProSet() },
@@ -160,6 +165,10 @@ namespace FootballTraining.Formations
                 { FormationType.TripsRight,  CreateTripsRight() },
                 { FormationType.Pistol,      CreatePistol() },
             };
+            return _cache;
         }
+
+        /// <summary>Force cache rebuild (e.g. after a scene reload in the editor).</summary>
+        public static void InvalidateCache() => _cache = null;
     }
 }

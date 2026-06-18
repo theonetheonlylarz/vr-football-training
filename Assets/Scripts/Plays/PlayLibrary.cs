@@ -66,15 +66,20 @@ namespace FootballTraining.Plays
             bool toRight = play.RunDirectionAngle >= 0;
             float dir = toRight ? 1f : -1f;
 
+            // The backside guard pulls — only include OLDownBlock for the FRONTSIDE guard.
+            // Both guards were previously listed, causing a duplicate SetMovementConfig
+            // call on the pulling guard that overwrote its pull config with a down-block.
+            PlayerRole pullingGuard  = toRight ? PlayerRole.LeftGuard  : PlayerRole.RightGuard;
+            PlayerRole downingGuard  = toRight ? PlayerRole.RightGuard : PlayerRole.LeftGuard;
+
             return new List<PlayerMovementConfig>
             {
-                OLDownBlock(PlayerRole.Center,       dir),
-                OLDownBlock(PlayerRole.LeftGuard,    dir),
-                OLDownBlock(PlayerRole.RightGuard,   dir),
-                OLDownBlock(PlayerRole.LeftTackle,   dir),
-                OLDownBlock(PlayerRole.RightTackle,  dir),
-                OLPull(toRight ? PlayerRole.LeftGuard : PlayerRole.RightGuard, dir, 3.0f), // pulling guard
-                OLDownBlock(PlayerRole.TightEnd,     dir),                                  // kick-out arc
+                OLDownBlock(PlayerRole.Center,    dir),
+                OLDownBlock(downingGuard,         dir),   // frontside guard down-blocks
+                OLDownBlock(PlayerRole.LeftTackle,  dir),
+                OLDownBlock(PlayerRole.RightTackle, dir),
+                OLPull(pullingGuard, dir, 3.0f),          // backside guard pulls — only entry for this role
+                OLDownBlock(PlayerRole.TightEnd,  dir),
                 FBLeadBlock(play.BallCarrierRole, dir),
                 HBPowerRun(play.BallCarrierRole, dir),
                 QBHandoff(),

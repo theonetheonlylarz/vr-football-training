@@ -53,12 +53,40 @@ namespace FootballTraining.Plays
             _isReplayMode = replay;
 
             _formationManager.SpawnFormation(play.Formation);
+            AlignGapZonesToFormation();   // must happen after SpawnFormation so transforms exist
             ApplyMovementConfigs(play);
+        }
+
+        // Repositions gap zone colliders to match the actual spawned linemen positions.
+        // Without this, gap zones sit at their editor-placed positions and won't match
+        // non-standard formations (Trips, Shotgun, Pistol, etc.).
+        private void AlignGapZonesToFormation()
+        {
+            if (_gapManager == null) return;
+
+            var lt = _formationManager.GetPlayerByRole(PlayerRole.LeftTackle)?.transform;
+            var lg = _formationManager.GetPlayerByRole(PlayerRole.LeftGuard)?.transform;
+            var c  = _formationManager.GetPlayerByRole(PlayerRole.Center)?.transform;
+            var rg = _formationManager.GetPlayerByRole(PlayerRole.RightGuard)?.transform;
+            var rt = _formationManager.GetPlayerByRole(PlayerRole.RightTackle)?.transform;
+            var te = _formationManager.GetPlayerByRole(PlayerRole.TightEnd)?.transform;
+
+            if (lt == null || lg == null || c == null || rg == null || rt == null)
+            {
+                Debug.LogWarning("[PlayDirector] Missing linemen transforms — gap zones not realigned.");
+                return;
+            }
+            _gapManager.AlignGapsToFormation(lt, lg, c, rg, rt, te);
         }
 
         private void ApplyMovementConfigs(PlayConfig play)
         {
-            if (!_playBuilders.TryGetValue(play.PlayType, out var builder)) return;
+            if (!_playBuilders.TryGetValue(play.PlayType, out var builder))
+            {
+                Debug.LogWarning($"[PlayDirector] No movement builder for PlayType '{play.PlayType}'. " +
+                                 "Register it in _playBuilders or add a PlayLibrary builder. Players will stand still.");
+                return;
+            }
 
             var configs = builder(play);
             foreach (var cfg in configs)
@@ -94,11 +122,11 @@ namespace FootballTraining.Plays
 
             yield return new WaitForSeconds(snapDelay / _speedMult);
 
-            // Hard count jump fake
+            // Hard count jump fake — scale duration with speed multiplier like everything else
             if (_difficulty != null && Random.value < _difficulty.SnapCountJumpFakeChance)
             {
                 _calloutSystem?.PlayHardCount();
-                yield return new WaitForSeconds(1.0f);
+                yield return new WaitForSeconds(1.0f / _speedMult);
             }
 
             // --- SNAP ---
@@ -131,7 +159,12 @@ namespace FootballTraining.Plays
         public void PausePlay(bool paused)
         {
             _isPaused = paused;
-            Time.timeScale = paused ? 0f : 1f;
+            // Never touch Time.timeScale in a VR app. Freezing it decouples head tracking
+            // from rendering and causes immediate motion sickness on-headset.
+            // Instead, each player's coroutine checks _paused and skips elapsed-time
+            // advancement, while the animator speed is set to 0 to freeze playback.
+            foreach (var p in _formationManager.ActivePlayers)
+                p.SetPaused(paused);
         }
 
         public void SetSpeedMultiplier(float mult)
@@ -144,7 +177,7 @@ namespace FootballTraining.Plays
         public void ResetPlay()
         {
             if (_playCoroutine != null) { StopCoroutine(_playCoroutine); _playCoroutine = null; }
-            Time.timeScale = 1f;
+            _isPaused = false;
             _formationManager.ResetAllToPreSnapPositions();
             _reactionTimer.StopTimer();
             _gapManager.CloseSelectionWindow();
