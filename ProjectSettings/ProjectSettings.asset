@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 23
+  productGUID: a1b2c3d4e5f6789012345678
+  AndroidProfiler: 0
+  AndroidFilterTouchesWhenObscured: 0
+  AndroidEnableSustainedPerformanceMode: 0
+  defaultScreenOrientation: 4
+  targetDevice: 2
+  useOnDemandResources: 0
+  accelerometerFrequency: 60
+  companyName: DefaultCompany
+  productName: VR Football Linebacker Training
+  defaultCursor: {fileID: 0}
+  cursorHotspot: {x: 0, y: 0}
+  bundleVersion: 1.0
+  preloadedAssets: []
+  metroInputSource: 0
+  wsaTransparentSwapchain: 0
+  m_HolographicPauseOnTrackingLoss: 1
+  xboxControllerOnStartOption: 0
+  resolutionDialogBanner: {fileID: 0}
+  defaultIsNativeResolution: 1
+  defaultIsFullScreen: 1
+  RunInBackground: 1
+  stripEngineCode: 1
+  graphicsJobMode: 0
+  applicationIdentifier:
+    Android: com.footballtraining.linebacker
+  AndroidBundleVersionCode: 1
+  AndroidMinSdkVersion: 26
+  AndroidTargetSdkVersion: 0
+  AndroidPreferredInstallLocation: 1
+  aotOptions:
+  svgImages: []
+  apiCompatibilityLevel: 6
+  scriptingBackend:
+    Android: 1
+  il2cppCompilerConfiguration:
+    Android: 1
+  managedStrippingLevel:
+    Android: 2
+  allowedThreadOwnership: 1
+  gcIncremental: 1
+  vr_supported: 1
+  renderingPath: 1
+  mobileRenderingPath: 1
+  colorGamut:
+  - 0
+  targetPixelDensity: 1
+  resolutionScalingMode: 0
+  resetResolutionOnWindowResize: 0
+  androidSupportedAspectRatio: 1
+  androidMaxAspectRatio: 2.1
+  applicationExit: 0
+  xrSettings:
+    vrDeviceDisableFallback: 0
+  activeBuildTargetGroup: 13
+  activeInputHandler: 3
