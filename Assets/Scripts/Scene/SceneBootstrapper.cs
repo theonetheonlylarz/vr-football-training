@@ -65,16 +65,11 @@ namespace FootballTraining.Scene
 
         private void WireEvents()
         {
-            // Gap selection → GameManager
+            // Gap selection → GameManager (covers both confirmed selection AND the timer-expired
+            // path — GapAssignmentManager itself fires OnGapSelected with GapLocation.None when
+            // its internal window timeout fires, so no separate OnTimerExpired handler needed here).
             _gapManager.OnGapSelected += (gap, rt) =>
                 GameManager.Instance?.SubmitRepResult(gap, rt);
-
-            // Reaction timer expired → submit no-selection
-            _reactionTimer.OnTimerExpired += () =>
-            {
-                _gapManager.CloseSelectionWindow();
-                GameManager.Instance?.SubmitRepResult(GapLocation.None, _reactionTimer.GetElapsed());
-            };
 
             // State machine → subsystems
             GameManager.OnStateChanged += OnStateChanged;
@@ -106,12 +101,16 @@ namespace FootballTraining.Scene
 
             if (state == GameState.PreSnap)
             {
-                // After pre-snap view window ends, trigger the snap sequence
+                // Cancel any stale pending snap from a previous rep before scheduling a new one.
+                CancelInvoke(nameof(TriggerSnap));
                 float viewSeconds = GameManager.Instance?.ActiveDifficultyConfig?.PreSnapViewSeconds ?? 4f;
                 Invoke(nameof(TriggerSnap), viewSeconds);
             }
 
-            if (state == GameState.PlayRunning && isTest && !_testModeCtrl.IsRunning)
+            // BeginTest at PlaySelect so the RunTest coroutine's WaitUntil(PreSnap) fires
+            // correctly for the first rep. Triggering at PlayRunning caused the first rep to be
+            // skipped because PreSnap had already passed.
+            if (state == GameState.PlaySelect && isTest && _testModeCtrl != null && !_testModeCtrl.IsRunning)
                 _testModeCtrl.BeginTest();
         }
 

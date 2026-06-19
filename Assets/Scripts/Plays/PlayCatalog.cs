@@ -203,10 +203,12 @@ namespace FootballTraining.Plays
             return new List<BlockAssignmentConfig>
             {
                 new() { BlockerRole = PlayerRole.Center,      Target = BlockingTarget.ALeftGap,   BlockAngleDegrees = dir * 10f },
-                new() { BlockerRole = PlayerRole.LeftGuard,   Target = BlockingTarget.BLeftGap,   BlockAngleDegrees = dir * 10f,
-                        IsPullBlock = !toRight, PullDistanceYards = toRight ? 0 : 4f },
-                new() { BlockerRole = PlayerRole.RightGuard,  Target = BlockingTarget.BRightGap,  BlockAngleDegrees = dir * 10f,
+                // LeftGuard is the backside (away from the run) on Power Right — it pulls.
+                // IsPullBlock = toRight keeps this consistent with PlayLibrary.BuildPowerMovements.
+                new() { BlockerRole = PlayerRole.LeftGuard,  Target = BlockingTarget.BLeftGap,  BlockAngleDegrees = dir * 10f,
                         IsPullBlock = toRight,  PullDistanceYards = toRight ? 4f : 0 },
+                new() { BlockerRole = PlayerRole.RightGuard, Target = BlockingTarget.BRightGap, BlockAngleDegrees = dir * 10f,
+                        IsPullBlock = !toRight, PullDistanceYards = toRight ? 0 : 4f },
                 new() { BlockerRole = PlayerRole.LeftTackle,  Target = BlockingTarget.Cutoff,     BlockAngleDegrees = dir * -20f },
                 new() { BlockerRole = PlayerRole.RightTackle, Target = BlockingTarget.CRightGap,  BlockAngleDegrees = dir * 15f },
                 new() { BlockerRole = PlayerRole.TightEnd,    Target = BlockingTarget.KickOut,    BlockAngleDegrees = dir * 40f },

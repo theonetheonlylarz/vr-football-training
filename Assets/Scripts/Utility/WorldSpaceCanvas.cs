@@ -24,13 +24,11 @@ namespace FootballTraining.Utility
             _canvas.renderMode = RenderMode.WorldSpace;
         }
 
-        private void Start()
-        {
-            _camera = Camera.main?.transform;
-        }
-
         private void LateUpdate()
         {
+            // XR doesn't tag the HMD camera as MainCamera until after XR initializes,
+            // so fetch lazily each frame until we get a valid reference.
+            _camera ??= Camera.main?.transform;
             if (_camera == null) return;
 
             if (_fixedDistance)

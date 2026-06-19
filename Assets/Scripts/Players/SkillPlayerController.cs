@@ -29,7 +29,9 @@ namespace FootballTraining.Players
         public void AssignRoute(PlayerMovementConfig routeConfig)
         {
             _assignedRoute = routeConfig.RouteType;
-            SetMovementConfig(routeConfig);
+            // Do NOT call SetMovementConfig here — PlayDirector.ApplyMovementConfigs already
+            // called it with the correct speed multiplier. Calling it again resets
+            // _speedMultiplier to 1.0 (the default), breaking non-1x difficulty speeds.
         }
 
         public void ExecuteRoute()

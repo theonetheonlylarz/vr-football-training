@@ -47,9 +47,9 @@ namespace FootballTraining.Training
         {
             for (_repCount = 1; _repCount <= _repsPerTest; _repCount++)
             {
-                // Hook into GameManager to get a play loaded
+                // Wait for PreSnap phase. SceneBootstrapper handles the Invoke(TriggerSnap)
+                // delay internally — no need to duplicate that wait here.
                 yield return new WaitUntil(() => GameManager.Instance?.CurrentState == GameState.PreSnap);
-                yield return new WaitForSeconds(GameManager.Instance.ActiveDifficultyConfig?.PreSnapViewSeconds ?? 3f);
 
                 // Play will auto-start via PlayDirector triggered by state change
                 yield return new WaitUntil(() => GameManager.Instance?.CurrentState == GameState.PlayComplete);

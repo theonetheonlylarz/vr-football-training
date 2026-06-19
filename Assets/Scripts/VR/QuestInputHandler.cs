@@ -23,6 +23,9 @@ namespace FootballTraining.VR
         private InputDevice _rightController;
         private InputDevice _leftController;
         private bool _wasConfirmPressed;
+        private bool _primaryButtonDown;
+        private bool _prevConfirm;
+        private bool _prevPrimary;
 
         private void OnEnable()
         {
@@ -53,7 +56,15 @@ namespace FootballTraining.VR
 
         private void Update()
         {
-            _wasConfirmPressed = ReadConfirmThisFrame();
+            // Rising-edge detection: fire only on the frame the button is first pressed.
+            bool confirm  = ReadConfirmThisFrame();
+            bool primary  = ReadPrimaryThisFrame();
+
+            _wasConfirmPressed  = confirm && !_prevConfirm;
+            _primaryButtonDown  = primary && !_prevPrimary;
+
+            _prevConfirm = confirm;
+            _prevPrimary = primary;
         }
 
         // ── Public API ────────────────────────────────────────────────────────────
@@ -83,13 +94,7 @@ namespace FootballTraining.VR
             return false;
         }
 
-        public bool GetPrimaryButtonDown()
-        {
-            InputDevice dominant = _isRightHanded ? _rightController : _leftController;
-            if (dominant.TryGetFeatureValue(CommonUsages.primaryButton, out bool val))
-                return val;
-            return false;
-        }
+        public bool GetPrimaryButtonDown() => _primaryButtonDown;
 
         public bool GetSecondaryButtonDown()
         {
@@ -124,10 +129,18 @@ namespace FootballTraining.VR
 
         public void SetHandedness(bool rightHanded) => _isRightHanded = rightHanded;
 
+        private bool ReadPrimaryThisFrame()
+        {
+            InputDevice dominant = _isRightHanded ? _rightController : _leftController;
+            if (dominant.TryGetFeatureValue(CommonUsages.primaryButton, out bool val))
+                return val;
+            return false;
+        }
+
         private bool ReadConfirmThisFrame()
         {
             // Trigger OR primary button confirms a gap selection
-            return GetTriggerDown() || GetPrimaryButtonDown();
+            return GetTriggerDown() || ReadPrimaryThisFrame();
         }
     }
 }

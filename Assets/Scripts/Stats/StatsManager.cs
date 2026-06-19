@@ -20,7 +20,12 @@ namespace FootballTraining.Stats
         {
             get
             {
-                _allSessions ??= new List<SessionData>(_sessionManager.LoadAllSessions());
+                if (_allSessions == null)
+                {
+                    _allSessions = _sessionManager != null
+                        ? new List<SessionData>(_sessionManager.LoadAllSessions())
+                        : new List<SessionData>();
+                }
                 return _allSessions;
             }
         }
@@ -106,6 +111,8 @@ namespace FootballTraining.Stats
                     dict.TryGetValue(r.Formation, out var cur);
                     dict[r.Formation] = (cur.correct + (r.WasCorrect ? 1 : 0), cur.total + 1);
                 }
+
+            if (dict.Count == 0) return (FormationType.IFormation, 0f);
 
             FormationType worst = FormationType.IFormation;
             float lowestPct = float.MaxValue;

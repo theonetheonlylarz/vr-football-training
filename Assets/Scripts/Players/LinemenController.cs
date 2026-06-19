@@ -142,7 +142,9 @@ namespace FootballTraining.Players
 
         private float GetPlaySpeedMultiplier()
         {
-            return _animator != null ? _animator.speed : 1f;
+            // Read the field directly — _animator.speed is 0 when paused, which would
+            // produce Infinity when used as a divisor in waypoint duration calculations.
+            return _speedMultiplier;
         }
     }
 }

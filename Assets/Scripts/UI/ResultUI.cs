@@ -68,9 +68,6 @@ namespace FootballTraining.UI
             bool isPractice = GameManager.Instance?.ActiveMode == TrainingMode.Practice;
             _replayButton?.gameObject.SetActive(isPractice);
 
-            AudioManager.Instance?.PlaySFX(correct
-                ? null   // AudioManager handles correct/wrong internally
-                : null);
             if (correct) AudioManager.Instance?.PlayCorrectFeedback();
             else         AudioManager.Instance?.PlayWrongFeedback();
 

@@ -22,19 +22,30 @@ namespace FootballTraining.UI
         [Header("Instruction")]
         [SerializeField] private TextMeshProUGUI _instructionText;
 
+        private int _currentRep;
+
         private void Awake()
         {
             GameManager.OnStateChanged += OnStateChanged;
+            GameManager.OnRepCompleted += OnRepCompleted;
         }
 
         private void OnDestroy()
         {
             GameManager.OnStateChanged -= OnStateChanged;
+            GameManager.OnRepCompleted -= OnRepCompleted;
         }
 
         private void OnStateChanged(GameState state)
         {
             if (state == GameState.PlayComplete || state == GameState.MainMenu) Hide();
+            if (state == GameState.PlaySelect) _currentRep = 0;
+        }
+
+        private void OnRepCompleted(bool correct, GapLocation gap, float rt)
+        {
+            _currentRep++;
+            UpdateRepCounter();
         }
 
         public void Show()
@@ -61,10 +72,13 @@ namespace FootballTraining.UI
         private void UpdateRepCounter()
         {
             if (_repCounterLabel == null) return;
-            int count = GameManager.Instance?.ActiveMode == TrainingMode.Test
-                ? GameManager.Instance?.ActiveDifficultyConfig != null ? 15 : 15
-                : 0;
-            _repCounterLabel.gameObject.SetActive(GameManager.Instance?.ActiveMode == TrainingMode.Test);
+            bool isTest = GameManager.Instance?.ActiveMode == TrainingMode.Test;
+            _repCounterLabel.gameObject.SetActive(isTest);
+            if (isTest)
+            {
+                int target = GameManager.Instance?.GetTestModeRepTarget() ?? 15;
+                _repCounterLabel.text = $"Rep {_currentRep} / {target}";
+            }
         }
     }
 }

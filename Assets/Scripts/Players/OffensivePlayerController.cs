@@ -21,7 +21,7 @@ namespace FootballTraining.Players
 
         private PlayerMovementConfig _movementConfig;
         private Coroutine _moveCoroutine;
-        private float _speedMultiplier = 1f;
+        protected float _speedMultiplier = 1f;
         private bool _paused;
 
         // Animator parameter names

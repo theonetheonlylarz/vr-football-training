@@ -18,6 +18,7 @@ namespace FootballTraining.Training
         [SerializeField] private int _currentSpeedIndex = 3;    // Start at full speed
 
         private bool _isPaused;
+        private float _thumbstickCooldown;
 
         public float CurrentSpeed => _speedPresets[_currentSpeedIndex];
 
@@ -30,10 +31,22 @@ namespace FootballTraining.Training
             if (_input.GetPrimaryButtonDown())
                 TogglePause();
 
-            // Thumbstick left/right: cycle speed
+            // Thumbstick left/right: cycle speed (cooldown prevents cycling all presets in one hold)
             var stick = _input.GetThumbstick();
-            if (stick.x > 0.7f) SpeedUp();
-            else if (stick.x < -0.7f) SlowDown();
+            if (_thumbstickCooldown > 0f)
+            {
+                _thumbstickCooldown -= Time.deltaTime;
+            }
+            else if (stick.x > 0.7f)
+            {
+                SpeedUp();
+                _thumbstickCooldown = 0.3f;
+            }
+            else if (stick.x < -0.7f)
+            {
+                SlowDown();
+                _thumbstickCooldown = 0.3f;
+            }
         }
 
         public void TogglePause()

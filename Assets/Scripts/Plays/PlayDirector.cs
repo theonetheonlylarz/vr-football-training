@@ -110,7 +110,16 @@ namespace FootballTraining.Plays
         public void StartPlay()
         {
             if (_playCoroutine != null) StopCoroutine(_playCoroutine);
-            _playCoroutine = StartCoroutine(RunPlay());
+            _playCoroutine = StartCoroutine(RunPlayAndClear());
+        }
+
+        // Wrapper so _playCoroutine is nulled after the coroutine exits naturally,
+        // not on the last yield inside RunPlay — which would race with an immediate
+        // ResetPlay() call turning StopCoroutine into a no-op.
+        private IEnumerator RunPlayAndClear()
+        {
+            yield return RunPlay();
+            _playCoroutine = null;
         }
 
         private IEnumerator RunPlay()
@@ -153,7 +162,6 @@ namespace FootballTraining.Plays
             }
 
             yield return new WaitForSeconds(_activePlay.PlayDurationSeconds / _speedMult);
-            _playCoroutine = null;
         }
 
         public void PausePlay(bool paused)

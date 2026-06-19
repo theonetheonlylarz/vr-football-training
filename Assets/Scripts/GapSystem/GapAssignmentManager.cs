@@ -156,8 +156,10 @@ namespace FootballTraining.GapSystem
             SetGapPosition(GapLocation.CRight, lRT.position + Vector3.right * 0.8f);
             if (te != null)
             {
-                SetGapPosition(GapLocation.DLeft,  te.position + Vector3.left  * 0.8f);
-                SetGapPosition(GapLocation.DRight, te.position + Vector3.right * 0.8f);
+                // DRight is outside the TE (right side). DLeft is outside the left tackle —
+                // not the TE — since TE is typically on the right and there is no left TE.
+                SetGapPosition(GapLocation.DLeft,  lLT.position + Vector3.left  * 0.8f);
+                SetGapPosition(GapLocation.DRight, te.position  + Vector3.right * 0.8f);
             }
         }
 

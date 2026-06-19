@@ -56,7 +56,11 @@ namespace FootballTraining.Core
 
         private void Start()
         {
-            TransitionTo(GameState.MainMenu);
+            // _currentState is already GameState.MainMenu from field initializer.
+            // TransitionTo would no-op on the same-state guard, so drive the first
+            // entry directly instead.
+            OnEnterState(_currentState);
+            OnStateChanged?.Invoke(_currentState);
         }
 
         public void TransitionTo(GameState newState)
@@ -162,7 +166,7 @@ namespace FootballTraining.Core
             TransitionTo(GameState.MainMenu);
         }
 
-        private int GetTestModeRepTarget() => ActiveDifficulty switch
+        public int GetTestModeRepTarget() => ActiveDifficulty switch
         {
             Difficulty.Easy   => 10,
             Difficulty.Medium => 15,

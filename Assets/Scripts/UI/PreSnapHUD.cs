@@ -82,6 +82,7 @@ namespace FootballTraining.UI
         public void Hide()
         {
             _hudAnimator?.SetTrigger("FadeOut");
+            CancelInvoke(nameof(Deactivate));   // prevent accumulated calls from hiding a freshly re-shown HUD
             Invoke(nameof(Deactivate), 0.3f);
         }
 
